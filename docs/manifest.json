@@ -1,0 +1,8 @@
+{
+  "name": "Thread File Reply",
+  "description": "Watches threads under one channel per server and replies with a custom message when a normal message (no pings, not a reply) has an attachment or Google Drive link.",
+  "authors": [{ "name": "prueba74848-wq" }],
+  "main": "index.js",
+  "hash": "4932987326462e641f2d0f871ea9f69d97b614484f37e939ddd181bc0c79a9b7",
+  "vendetta": { "icon": "ic_message" }
+}
