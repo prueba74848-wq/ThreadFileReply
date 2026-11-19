@@ -96,6 +96,30 @@
     }
   }
 
+  // Switch that keeps its own state so it always flips on tap,
+  // and writes through to storage.
+  function Toggle({ label, get, set }) {
+    const [value, setValue] = React.useState(!!get());
+    return React.createElement(FormSwitchRow, {
+      label,
+      value,
+      onValueChange: (v) => {
+        setValue(v);
+        set(v);
+      },
+    });
+  }
+
+  // Replace the whole rules array so the change is always saved.
+  function updateRule(i, patch) {
+    storage.rules = storage.rules.map((r, j) => ({
+      enabled: r.enabled,
+      channelId: r.channelId,
+      reply: r.reply,
+      ...(j === i ? patch : {}),
+    }));
+  }
+
   function Settings() {
     useProxy(storage);
     ensureDefaults();
@@ -105,23 +129,23 @@
       h(
         FormSection,
         { key: i, title: `Server ${i + 1}`, titleStyleType: "no_border" },
-        h(FormSwitchRow, {
+        h(Toggle, {
           label: "Enabled",
-          value: rule.enabled,
-          onValueChange: (v) => (rule.enabled = v),
+          get: () => storage.rules[i].enabled,
+          set: (v) => updateRule(i, { enabled: v }),
         }),
         h(FormInput, {
           title: "Forum/parent channel ID",
           placeholder: "Channel ID whose threads are watched",
           value: rule.channelId,
-          onChange: (v) => (rule.channelId = v.trim()),
+          onChange: (v) => updateRule(i, { channelId: v.trim() }),
           keyboardType: "numeric",
         }),
         h(FormInput, {
           title: "Reply for this server",
           placeholder: "Message sent in the thread",
           value: rule.reply,
-          onChange: (v) => (rule.reply = v),
+          onChange: (v) => updateRule(i, { reply: v }),
           multiline: true,
         })
       )
@@ -140,15 +164,15 @@
           onChange: (v) => (storage.delayMs = Number(v.replace(/\D/g, "")) || 0),
           keyboardType: "numeric",
         }),
-        h(FormSwitchRow, {
+        h(Toggle, {
           label: "Include the thread's first post",
-          value: storage.includeFirstPost,
-          onValueChange: (v) => (storage.includeFirstPost = v),
+          get: () => storage.includeFirstPost,
+          set: (v) => (storage.includeFirstPost = v),
         }),
-        h(FormSwitchRow, {
+        h(Toggle, {
           label: "Send as a reply to the message",
-          value: storage.replyToMessage,
-          onValueChange: (v) => (storage.replyToMessage = v),
+          get: () => storage.replyToMessage,
+          set: (v) => (storage.replyToMessage = v),
         }),
         h(
           FormText,
